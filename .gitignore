@@ -1,0 +1,21 @@
+# Dependecies
+**/node_modules/
+node_modules/
+
+# Build & Output
+**/dist/
+dist/
+
+# Environment Variables
+**/.env
+**/.env.*
+**/serviceAccountKey.json
+
+# IDE & OS
+.DS_Store
+.idea/
+.vscode/
+
+# Docker volumes (ixtiyoriy)
+**/postgres_data/
+**/redis_data/

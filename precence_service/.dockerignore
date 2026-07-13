@@ -1,0 +1,26 @@
+# Node modules va log fayllar
+node_modules
+npm-debug.log
+.npm
+
+# Docker fayllari
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Git fayllari
+.git
+.gitignore
+
+# Loyihani kompilyatsiya qilish natijasida hosil bo'lgan papkalar
+dist
+build
+out
+
+# Local muhitdagi environment o'zgaruvchilari
+.env
+.env.local
+
+# OS (Operatsion tizim) tomonidan yaratilgan fayllar
+.DS_Store
+Thumbs.db

@@ -1,0 +1,15 @@
+# Node.js bazaviy tasviri
+FROM node:20-alpine
+
+# Ishchi katalog
+WORKDIR /app
+
+# Bog'liqliklarni o'rnatish
+COPY package*.json ./
+RUN npm install
+
+# Kodni ko'chirish
+COPY . .
+
+# Ishga tushirish buyrug'i
+CMD ["npm", "run", "start:dev"]
