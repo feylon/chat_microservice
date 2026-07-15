@@ -1,6 +1,6 @@
 import { forwardRef, Inject, UsePipes, ValidationPipe } from "@nestjs/common";
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from "@nestjs/websockets";
-import { WebSocketValidationPipe } from "global/globalSocketPipe";
+import { WebSocketValidationPipe } from "./WebSocketValidationPipe";
 import { Server, Socket } from "socket.io";
 import { ConversationsService } from "src/conversations/conversations.service";
 import { GetConversationsDto } from "src/messages/dto/getConversationsDto";
