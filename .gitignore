@@ -1,21 +1,17 @@
-# Dependecies
-**/node_modules/
 node_modules/
-
-# Build & Output
-**/dist/
 dist/
+coverage/
+*.log
+*.tsbuildinfo
 
-# Environment Variables
-**/.env
-**/.env.*
-**/serviceAccountKey.json
+.env
+.env.*
+!.env.example
+serviceAccountKey.json
 
-# IDE & OS
 .DS_Store
 .idea/
 .vscode/
 
-# Docker volumes (ixtiyoriy)
-**/postgres_data/
-**/redis_data/
+postgres_data/
+redis_data/
