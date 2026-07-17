@@ -2,7 +2,7 @@ import { Controller, Inject } from '@nestjs/common';
 import { ClientKafka, EventPattern, Payload } from '@nestjs/microservices';
 import { createMessageDTO } from './dto/createMessage';
 import { MessagesService } from './messages.service';
-import { chatGateway } from 'src/gateway/chat.gateway';
+import { chatGateway } from '../gateway/chat.gateway';
 import { EditMessageDTO } from './dto/editMessage';
 import { DeleteMessageDTO } from './dto/deleteMessage';
 

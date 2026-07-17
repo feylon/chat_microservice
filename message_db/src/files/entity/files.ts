@@ -1,4 +1,4 @@
-import { MessageEntity } from 'src/messages/entity/messages';
+import { MessageEntity } from '../../messages/entity/messages';
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToOne, JoinColumn } from 'typeorm';
 
 @Entity('files')

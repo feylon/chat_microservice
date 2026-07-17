@@ -1,5 +1,5 @@
-import { ConversationEntity } from 'src/conversations/entity/conversations';
-import { FileEntity } from 'src/files/entity/files';
+import { ConversationEntity } from '../../conversations/entity/conversations';
+import { FileEntity } from '../../files/entity/files';
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index, ManyToOne, OneToOne, JoinColumn, UpdateDateColumn } from 'typeorm';
 
 

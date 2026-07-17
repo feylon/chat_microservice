@@ -1,9 +1,9 @@
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
-import { ConversationEntity } from 'src/conversations/entity/conversations'; 
-import { MessageEntity } from 'src/messages/entity/messages'; 
-import { FileEntity } from 'src/files/entity/files'; 
-import { UserCacheEntity } from 'src/users/entity/users_cache';
+import { ConversationEntity } from './src/conversations/entity/conversations'; 
+import { MessageEntity } from './src/messages/entity/messages'; 
+import { FileEntity } from './src/files/entity/files'; 
+import { UserCacheEntity } from './src/users/entity/users_cache';
 
 dotenv.config();
 

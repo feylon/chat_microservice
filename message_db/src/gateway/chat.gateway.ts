@@ -2,10 +2,10 @@ import { forwardRef, Inject, UsePipes, ValidationPipe } from "@nestjs/common";
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from "@nestjs/websockets";
 import { WebSocketValidationPipe } from "./WebSocketValidationPipe";
 import { Server, Socket } from "socket.io";
-import { ConversationsService } from "src/conversations/conversations.service";
-import { GetConversationsDto } from "src/messages/dto/getConversationsDto";
-import { GetMessagesDto, SchemaGetMessage } from "src/messages/dto/GetMessageSchema";
-import { MessagesService } from "src/messages/messages.service";
+import { ConversationsService } from "../conversations/conversations.service";
+import { GetConversationsDto } from "../messages/dto/getConversationsDto";
+import { GetMessagesDto, SchemaGetMessage } from "../messages/dto/GetMessageSchema";
+import { MessagesService } from "../messages/messages.service";
 
 @UsePipes(new ValidationPipe({ exceptionFactory: (errors) => new WsException(errors) }))
 @WebSocketGateway({ cors: "*" })
