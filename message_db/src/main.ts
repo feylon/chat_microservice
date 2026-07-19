@@ -1,31 +1,42 @@
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { Partitioners } from 'kafkajs';
-import { ValidationPipe } from '@nestjs/common';
+import { AppModule } from './app.module';
+import { parseBrokers } from './config/env.validation';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const config = app.get(ConfigService);
+
+  app.enableCors();
+  app.enableShutdownHooks();
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.KAFKA,
     options: {
-      client: { brokers: ['localhost:9092'] },
-      consumer: { groupId: 'message-storage' },
-      producer: { createPartitioner: Partitioners.LegacyPartitioner },
+      client: {
+        clientId: config.get<string>('KAFKA_CLIENT_ID'),
+        brokers: parseBrokers(config.get<string>('KAFKA_BROKERS')),
+      },
+      consumer: { groupId: config.get<string>('KAFKA_GROUP_ID')! },
     },
   });
 
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   await app.startAllMicroservices();
-  await app.listen(3001); 
 
-  console.log('Message Storage (HTTP + Kafka) ishga tushdi: http://localhost:3001');
+  const port = config.get<number>('PORT') ?? 3001;
+  await app.listen(port);
+
+  Logger.log(`Message Storage (HTTP + WS + Kafka) ishga tushdi: http://localhost:${port}`, 'Bootstrap');
 }
 
-bootstrap();
+void bootstrap();

@@ -1,38 +1,36 @@
-import { Inject, Module, OnModuleInit } from '@nestjs/common';
+import { Inject, Logger, Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ClientKafka } from '@nestjs/microservices';
 import { MessagesModule } from './messages/messages.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { FilesModule } from './files/files.module';
 import { UsersModule } from './users/users.module';
-import { chatGateway } from './gateway/chat.gateway';
-import { ClientKafka, ClientsModule, Transport } from '@nestjs/microservices';
-import { KafkaModule } from './kafka/kafka.module';
-import { ConversationsService } from './conversations/conversations.service';
-import { ConversationEntity } from './conversations/entity/conversations';
-
+import { KAFKA_CLIENT, KafkaModule } from './kafka/kafka.module';
+import { envValidationSchema } from './config/env.validation';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ConversationEntity]),
-    KafkaModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validationSchema: envValidationSchema,
     }),
+    KafkaModule,
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
+      useFactory: (config: ConfigService) => ({
         type: 'postgres',
-        host: configService.get<string>('DATABASE_HOST') || 'postgres', // docker-compose'dagi nomi
-        port: configService.get<number>('DATABASE_PORT') || 5432,
-        username: configService.get<string>('POSTGRES_USER'),
-        password: configService.get<string>('POSTGRES_PASSWORD'),
-        database: configService.get<string>('POSTGRES_DB'),
+        host: config.get<string>('DATABASE_HOST'),
+        port: config.get<number>('DATABASE_PORT'),
+        username: config.get<string>('POSTGRES_USER'),
+        password: config.get<string>('POSTGRES_PASSWORD'),
+        database: config.get<string>('POSTGRES_DB'),
         synchronize: false,
         autoLoadEntities: true,
-        logging: true,
+        migrations: [__dirname + '/migrations/*.{ts,js}'],
+        migrationsRun: true,
+        logging: config.get<boolean>('DATABASE_LOGGING'),
       }),
     }),
     MessagesModule,
@@ -40,18 +38,14 @@ import { ConversationEntity } from './conversations/entity/conversations';
     FilesModule,
     UsersModule,
   ],
-  providers: [ConversationsService]
 })
 export class AppModule implements OnModuleInit {
-  constructor(
-    @Inject('KAFKA_CLIENT') private client: ClientKafka
-  ) { }
+  private readonly logger = new Logger(AppModule.name);
 
+  constructor(@Inject(KAFKA_CLIENT) private readonly kafka: ClientKafka) {}
 
-  onModuleInit(
-
-  ) {
-    this.client.connect();
-    console.info("[Microserive => Microservice] Kafkaga ulanish amalga oshirildi ")
+  async onModuleInit() {
+    await this.kafka.connect();
+    this.logger.log('Kafka producer ulandi');
   }
 }
