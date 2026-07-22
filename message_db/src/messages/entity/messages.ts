@@ -2,7 +2,6 @@ import { ConversationEntity } from '../../conversations/entity/conversations';
 import { FileEntity } from '../../files/entity/files';
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index, ManyToOne, OneToOne, JoinColumn, UpdateDateColumn } from 'typeorm';
 
-
 @Entity('messages')
 export class MessageEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -24,9 +23,9 @@ export class MessageEntity {
   content!: string;
 
   @Column({ default: 'text' })
-  messageType!: 'text' | 'file' ;
+  messageType!: 'text' | 'file';
 
-  @OneToOne(() => FileEntity, (file) => file.message, { nullable: true, cascade: true })
+  @OneToOne(() => FileEntity, (file) => file.message, { nullable: true })
   file!: FileEntity;
 
   @Index()
@@ -35,12 +34,11 @@ export class MessageEntity {
 
   @Index()
   @UpdateDateColumn()
-  updatedAt!:Date
+  updatedAt!: Date;
 
   @Column({ default: false })
   isRead!: boolean;
 
-
-  @Column({ default: false, select : false })
+  @Column({ default: false, select: false })
   isDelete!: boolean;
 }
