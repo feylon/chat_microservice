@@ -1,6 +1,5 @@
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { MessageEntity } from '../../messages/entity/messages';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-
 
 @Entity('conversations')
 export class ConversationEntity {
