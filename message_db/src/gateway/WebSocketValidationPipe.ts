@@ -1,40 +1,39 @@
-import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from '@nestjs/common';
+import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { WsException } from '@nestjs/websockets';
+
+const PRIMITIVES: unknown[] = [String, Boolean, Number, Array, Object];
 
 @Injectable()
-export class WebSocketValidationPipe implements PipeTransform<any> {
-  async transform(value: any, { metatype }: ArgumentMetadata) {
-     
+export class WebSocketValidationPipe implements PipeTransform<unknown> {
+  async transform(value: unknown, { metatype, type }: ArgumentMetadata) {
+    if (type !== 'body' || !metatype || PRIMITIVES.includes(metatype)) {
+      return value;
+    }
+
     let data = value;
     if (typeof value === 'string') {
       try {
         data = JSON.parse(value);
-      } catch (e) {
-        throw new WsException('Invalid JSON format');
+      } catch {
+        throw new WsException("JSON formati noto'g'ri");
       }
     }
 
-    
-    if (!metatype || this.toValidate(metatype)) {
-      return data;
-    }
+    const instance: object = plainToInstance(metatype, data ?? {});
+    const errors = await validate(instance, { whitelist: true, forbidNonWhitelisted: true });
 
-     
-    const object = plainToInstance(metatype, data);
-    
-    
-    const errors = await validate(object);
     if (errors.length > 0) {
-      throw new WsException(errors);  
+      throw new WsException({
+        message: 'Validatsiya xatosi',
+        errors: errors.map((error) => ({
+          field: error.property,
+          constraints: error.constraints,
+        })),
+      });
     }
 
-    return object;
-  }
-
-  private toValidate(metatype: Function): boolean {
-    const types: Function[] = [String, Boolean, Number, Array, Object];
-    return types.includes(metatype);
+    return instance;
   }
 }
