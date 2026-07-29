@@ -6,6 +6,7 @@ import { MessagesModule } from './messages/messages.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { FilesModule } from './files/files.module';
 import { UsersModule } from './users/users.module';
+import { GatewayModule } from './gateway/gateway.module';
 import { KAFKA_CLIENT, KafkaModule } from './kafka/kafka.module';
 import { envValidationSchema } from './config/env.validation';
 
@@ -37,6 +38,7 @@ import { envValidationSchema } from './config/env.validation';
     ConversationsModule,
     FilesModule,
     UsersModule,
+    GatewayModule,
   ],
 })
 export class AppModule implements OnModuleInit {

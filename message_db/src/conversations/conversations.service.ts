@@ -15,7 +15,7 @@ export class ConversationsService {
     const { userId, page, limit } = dto;
 
     const [data, total] = await this.conversations.findAndCount({
-      where: { participants: Like(`%${userId}%`) as unknown as string[] },
+      where: { participants: Like(`%${userId}%`) },
       order: { updatedAt: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
