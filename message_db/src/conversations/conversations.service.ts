@@ -1,38 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GetConversationsDto } from '../messages/dto/getConversationsDto';
+import { Like, Repository } from 'typeorm';
 import { ConversationEntity } from './entity/conversations';
-import { Any, Repository } from 'typeorm';
+import { GetConversationsDto } from './dto/getConversations.dto';
 
 @Injectable()
 export class ConversationsService {
-    constructor(
-        @InjectRepository(ConversationEntity) private readonly conversation: Repository<ConversationEntity>
-    ) { }
+  constructor(
+    @InjectRepository(ConversationEntity)
+    private readonly conversations: Repository<ConversationEntity>,
+  ) {}
 
+  async getUserConversations(dto: GetConversationsDto) {
+    const { userId, page, limit } = dto;
 
+    const [data, total] = await this.conversations.findAndCount({
+      where: { participants: Like(`%${userId}%`) },
+      order: { updatedAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
 
-    async getUserConversations(body: GetConversationsDto) {
-        const { limit, page, userId } = (body);
-        console.log(typeof body)
-        const skip = (page - 1) * limit;
-        const [data, total] = await this.conversation.findAndCount({
-            where: {
-                participants: Any([userId])
-            },
-            order: {
-                updatedAt: "DESC"
-            },
-            skip,
-            take: limit
-        });
+    return {
+      data,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    };
+  }
 
-        return {
-            data,
-            total,
-            page,
-            lastpage: Math.ceil(total / limit)
-        }
-
-    }
+  async isParticipant(conversationId: string, userId: string): Promise<boolean> {
+    const conversation = await this.conversations.findOne({ where: { id: conversationId } });
+    return !!conversation && conversation.participants.includes(userId);
+  }
 }

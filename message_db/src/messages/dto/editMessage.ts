@@ -1,13 +1,14 @@
-import { IsString, isUUID, IsUUID } from "class-validator";
+import { IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export class EditMessageDTO {
-    @IsUUID()
-    messageId!: string;
+  @IsUUID()
+  messageId!: string;
 
-    @IsString()
-    content!: string;
+  @IsString()
+  @MinLength(1)
+  @MaxLength(4000)
+  content!: string;
 
-    @IsUUID()
-    senderId!: string;
-
+  @IsUUID()
+  senderId!: string;
 }

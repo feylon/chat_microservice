@@ -20,7 +20,7 @@ export class MessageEntity {
   senderId!: string;
 
   @Column('text', { nullable: true })
-  content!: string;
+  content!: string | null;
 
   @Column({ default: 'text' })
   messageType!: 'text' | 'file';

@@ -1,11 +1,9 @@
-import { isUUID, IsUUID } from "class-validator";
+import { IsUUID } from 'class-validator';
 
 export class DeleteMessageDTO {
-    
-    @IsUUID()
-    MessageId! : string
+  @IsUUID()
+  messageId!: string;
 
-    @IsUUID()
-    senderId! : string;
-
+  @IsUUID()
+  senderId!: string;
 }

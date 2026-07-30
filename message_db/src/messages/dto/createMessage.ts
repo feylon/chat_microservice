@@ -1,44 +1,41 @@
-import { Type } from "class-transformer";
-import { IsEnum, IsInt, IsNumber, IsOptional, IsString, isString, IsUUID, ValidateNested } from "class-validator";
+import { Type } from 'class-transformer';
+import { IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, ValidateIf, ValidateNested } from 'class-validator';
 
 export class FileDTO {
-    
-    @IsString()
-    fileName! : string
+  @IsString()
+  fileName!: string;
 
-    @IsString()
-    filePath!: string;
+  @IsString()
+  filePath!: string;
 
-    @IsString()
-    mimeType! : string;
+  @IsString()
+  mimeType!: string;
 
-    @IsInt()
-    fileSize! : number;
+  @IsInt()
+  @Min(0)
+  fileSize!: number;
 }
 
+export class CreateMessageDTO {
+  @IsUUID()
+  conversationId!: string;
 
+  @IsUUID()
+  senderId!: string;
 
-export class createMessageDTO {
-    @IsUUID()
-    conservationId! : string;
+  @IsUUID()
+  receiverId!: string;
 
+  @ValidateIf((dto: CreateMessageDTO) => dto.messageType === 'text' || dto.content !== undefined)
+  @IsString()
+  @MaxLength(4000)
+  content?: string;
 
-    @IsUUID()
-    senderId!:string;
+  @IsIn(['text', 'file'])
+  messageType: 'text' | 'file' = 'text';
 
-
-    @IsUUID()
-    receiverId!: string;
-
-    @IsString()
-    content! : string;
-
-    @IsEnum(['text', 'file'])
-    messageType!:'text' | 'file';
-
-    @IsOptional()
-    @ValidateNested()
-    @Type(()=>FileDTO)
-    file? : FileDTO;
-
+  @ValidateIf((dto: CreateMessageDTO) => dto.messageType === 'file')
+  @ValidateNested()
+  @Type(() => FileDTO)
+  file?: FileDTO;
 }
