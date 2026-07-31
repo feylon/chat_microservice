@@ -12,17 +12,6 @@ async function bootstrap() {
   app.enableCors();
   app.enableShutdownHooks();
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        clientId: config.get<string>('KAFKA_CLIENT_ID'),
-        brokers: parseBrokers(config.get<string>('KAFKA_BROKERS')),
-      },
-      consumer: { groupId: config.get<string>('KAFKA_GROUP_ID')! },
-    },
-  });
-
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -31,12 +20,29 @@ async function bootstrap() {
     }),
   );
 
+  app.connectMicroservice<MicroserviceOptions>(
+    {
+      transport: Transport.KAFKA,
+      options: {
+        client: {
+          clientId: config.get<string>('KAFKA_CLIENT_ID'),
+          brokers: parseBrokers(config.get<string>('KAFKA_BROKERS')),
+        },
+        consumer: { groupId: config.get<string>('KAFKA_GROUP_ID')! },
+      },
+    },
+    { inheritAppConfig: true },
+  );
+
   await app.startAllMicroservices();
 
   const port = config.get<number>('PORT') ?? 3001;
   await app.listen(port);
 
-  Logger.log(`Message Storage (HTTP + WS + Kafka) ishga tushdi: http://localhost:${port}`, 'Bootstrap');
+  Logger.log(
+    `Message Storage (HTTP + WS + Kafka) ishga tushdi: http://localhost:${port}`,
+    'Bootstrap',
+  );
 }
 
 void bootstrap();

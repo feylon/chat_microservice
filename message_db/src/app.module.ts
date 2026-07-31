@@ -7,6 +7,7 @@ import { ConversationsModule } from './conversations/conversations.module';
 import { FilesModule } from './files/files.module';
 import { UsersModule } from './users/users.module';
 import { GatewayModule } from './gateway/gateway.module';
+import { HealthController } from './health/health.controller';
 import { KAFKA_CLIENT, KafkaModule } from './kafka/kafka.module';
 import { envValidationSchema } from './config/env.validation';
 
@@ -40,6 +41,7 @@ import { envValidationSchema } from './config/env.validation';
     UsersModule,
     GatewayModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule implements OnModuleInit {
   private readonly logger = new Logger(AppModule.name);
