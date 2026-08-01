@@ -1,18 +1,9 @@
-import { Global, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { CacheModule } from '@nestjs/cache-manager';
-import { Keyv, KeyvCacheableMemory } from 'cacheable';
-import KeyvRedis from '@keyv/redis';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { EventModule } from './event/event.module';
+import { RedisModule } from './redis/redis.module';
 
-@Global()
 @Module({
-   imports: [
-   
-    EventModule
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), RedisModule, EventModule],
 })
 export class AppModule {}
