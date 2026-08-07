@@ -1,39 +1,40 @@
-import { Controller, Inject } from '@nestjs/common';
-import { Ctx, MessagePattern, Payload, RedisContext } from '@nestjs/microservices';
-import { UserOnlineDto } from './dto/userOnline.dto';
-import { firstValueFrom } from 'rxjs';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import Redis from 'ioredis';
+import { Controller, Logger } from '@nestjs/common';
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
+import { GetUserStatusDto, GetUsersStatusDto } from './dto/getStatus.dto';
 import { UserOfflineDto } from './dto/userOffline.dto';
+import { UserOnlineDto } from './dto/userOnline.dto';
+import { EventService } from './event.service';
 
-// @Controller('event')
+@Controller()
 export class EventController {
+  private readonly logger = new Logger(EventController.name);
 
-    constructor(@Inject(CACHE_MANAGER) private cacheManager: Redis) { }
+  constructor(private readonly eventService: EventService) {}
 
+  @EventPattern('user_online')
+  async onUserOnline(@Payload() data: UserOnlineDto) {
+    await this.eventService.setOnline(data.userId);
+    this.logger.log(`${data.userId} online`);
+  }
 
+  @EventPattern('user_offline')
+  async onUserOffline(@Payload() data: UserOfflineDto) {
+    await this.eventService.setOffline(data.userId);
+    this.logger.log(`${data.userId} offline`);
+  }
 
-    @MessagePattern('user_online')
-    async set_online_user(@Payload() data: UserOnlineDto, @Ctx() context: RedisContext) {
-        console.log(data.userId)
-        await this.cacheManager.set(`user_isonline${data.userId}`, JSON.stringify(
-            {
-                userId: data.userId,
-                status: "online"
-            }
-        ))
-        return;;
-    }
+  @EventPattern('user_heartbeat')
+  async onHeartbeat(@Payload() data: UserOnlineDto) {
+    await this.eventService.setOnline(data.userId);
+  }
 
-    @MessagePattern('user_offline')
-    async set_offline_user(@Payload() data: UserOfflineDto) {
-        console.log(data);
-        const foundData = await this.cacheManager.get(`user_isonline${data.userId}`);
-        console.log(foundData)
-        await this.cacheManager.del(`user_isonline${data.userId}`)
+  @MessagePattern('get_user_status')
+  getUserStatus(@Payload() data: GetUserStatusDto) {
+    return this.eventService.getStatus(data.userId);
+  }
 
-        const foundData1 = await this.cacheManager.get(`user_isonline${data.userId}`);
-        console.log(foundData1)
-    }
-
+  @MessagePattern('get_users_status')
+  getUsersStatus(@Payload() data: GetUsersStatusDto) {
+    return this.eventService.getStatuses(data.userIds);
+  }
 }
