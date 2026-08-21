@@ -1,18 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { ConversationsController } from './conversations.controller';
+import { ConversationsService } from './conversations.service';
 
 describe('ConversationsController', () => {
-  let controller: ConversationsController;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+  it('suhbatlar ro`yxatini servisdan oladi', async () => {
+    const service = { getUserConversations: jest.fn().mockResolvedValue({ data: [] }) };
+    const moduleRef = await Test.createTestingModule({
       controllers: [ConversationsController],
+      providers: [{ provide: ConversationsService, useValue: service }],
     }).compile();
 
-    controller = module.get<ConversationsController>(ConversationsController);
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+    const controller = moduleRef.get(ConversationsController);
+    await expect(controller.getUserConversations({ userId: 'u1', page: 1, limit: 10 })).resolves.toEqual({ data: [] });
   });
 });
