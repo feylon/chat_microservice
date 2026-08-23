@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chat Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Chat Demo</h1>
+    <span id="connection" class="badge offline">uzilgan</span>
+  </header>
+
+  <section id="login" class="card">
+    <h2>Kirish</h2>
+    <label>Sizning ID (UUID)
+      <div class="row">
+        <input id="userId" placeholder="xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx">
+        <button type="button" data-generate="userId">Yangi</button>
+      </div>
+    </label>
+    <button id="connectBtn" type="button" class="primary">Ulanish</button>
+  </section>
+
+  <main id="app" hidden>
+    <aside class="card">
+      <h2>Suhbatlar</h2>
+      <ul id="conversations"></ul>
+      <h2>Yangi suhbat</h2>
+      <label>Qabul qiluvchi ID
+        <div class="row">
+          <input id="receiverId" placeholder="UUID">
+          <button type="button" data-generate="receiverId">Yangi</button>
+        </div>
+      </label>
+      <button id="newConversationBtn" type="button">Suhbatni ochish</button>
+      <h2>Bildirishnomalar <button id="refreshNotifications" type="button" class="small">Yangilash</button></h2>
+      <ul id="notifications"></ul>
+    </aside>
+
+    <section class="card chat">
+      <div class="chat-head">
+        <div>
+          <strong id="chatTitle">Suhbat tanlanmagan</strong>
+          <div id="chatMeta" class="muted"></div>
+        </div>
+        <span id="peerStatus" class="badge"></span>
+      </div>
+      <ul id="messages"></ul>
+      <form id="sendForm">
+        <input id="messageInput" placeholder="Xabar yozing..." autocomplete="off" disabled>
+        <button type="submit" class="primary" disabled>Yuborish</button>
+      </form>
+    </section>
+  </main>
+
+  <div id="toast" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>
