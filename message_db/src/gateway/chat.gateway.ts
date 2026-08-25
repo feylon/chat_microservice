@@ -60,8 +60,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('join_room')
   async handleJoinRoom(@MessageBody() body: JoinRoomDto, @ConnectedSocket() client: Socket) {
     const userId = client.data.userId as string | undefined;
-    if (userId && !(await this.conversationsService.isParticipant(body.conversationId, userId))) {
-      throw new WsException("Siz bu suhbat ishtirokchisi emassiz");
+    if (userId && !(await this.conversationsService.canJoin(body.conversationId, userId))) {
+      throw new WsException('Siz bu suhbat ishtirokchisi emassiz');
     }
     await client.join(body.conversationId);
     return { event: 'joined_room', data: { conversationId: body.conversationId } };

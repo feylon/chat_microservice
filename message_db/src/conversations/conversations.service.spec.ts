@@ -27,4 +27,9 @@ describe('ConversationsService', () => {
     await expect(service.isParticipant('c1', 'u1')).resolves.toBe(true);
     await expect(service.isParticipant('c1', 'u3')).resolves.toBe(false);
   });
+
+  it("hali yaratilmagan suhbatga qo'shilishga ruxsat beradi", async () => {
+    repository.findOne.mockResolvedValue(null);
+    await expect(service.canJoin('new', 'u1')).resolves.toBe(true);
+  });
 });

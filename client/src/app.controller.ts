@@ -1,23 +1,17 @@
-import { Controller, Get, Inject } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import Redis from 'ioredis';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService,
-    @Inject('REDIS_CLIENT') private readonly redis: Redis
+  constructor(private readonly appService: AppService) {}
 
-  ) { }
+  @Get('config.json')
+  getConfig() {
+    return this.appService.getConfig();
+  }
 
-  @Get()
-async getHello(): Promise<string> {
-
-     this.redis.emit("user_offline", {
-      
-        userId : "11a"
-      
-    });
-    console.log("User yozildi")
-    return this.appService.getHello();
+  @Get('health')
+  health() {
+    return { status: 'ok', service: 'demo-client' };
   }
 }
