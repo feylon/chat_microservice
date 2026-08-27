@@ -1,38 +1,11 @@
-services:
-  # message-storage
-  message-storage:
-    build:
-      context: ./message_db
-      dockerfile: Dockerfile.dev
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./message_db:/app
-      - /app/node_modules
-    environment:
-      NODE_ENV: development
-    depends_on:
-      - postgres
-      - kafka
-  
-  presence-service:
-    build:
-      context: ./precence_service
-      dockerfile: Dockerfile.dev
-    ports:
-      - "3002:3001" # Har bir servis alohida portda
-    volumes:
-      - ./precence_service:/app
-      - /app/node_modules
-    environment:
-      NODE_ENV: development
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-    depends_on:
-      - redis
+name: chat-microservice
 
+x-kafka-env: &kafka-env
+  KAFKA_BROKERS: kafka:29092
+
+services:
   postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     ports:
       - "5433:5432"
     environment:
@@ -41,12 +14,24 @@ services:
       POSTGRES_DB: chat_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d chat_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     ports:
       - "6380:6379"
     command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
@@ -63,20 +48,126 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server kafka:29092 --list >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+
+  kafka-init:
+    image: confluentinc/cp-kafka:7.4.0
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        for topic in save_message_request edit_message delete_message message_saved_success; do
+          kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic "$$topic" --partitions 1 --replication-factor 1
+        done
+    restart: "no"
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      # E'tibor bering: endi u ichki portga (29092) ulanadi
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+
+  message-storage:
+    build: ./message_db
+    ports:
+      - "3001:3001"
+    environment:
+      <<: *kafka-env
+      PORT: 3001
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: chat_db
+      KAFKA_CLIENT_ID: message-storage
+      KAFKA_GROUP_ID: message-storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  presence-service:
+    build: ./precence_service
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PRESENCE_TTL_SECONDS: 120
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  chat-api:
+    build: ./chat_service
+    ports:
+      - "3000:3000"
+    environment:
+      <<: *kafka-env
+      PORT: 3000
+      KAFKA_CLIENT_ID: chat-api
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  notification-service:
+    build: ./notification_service
+    ports:
+      - "3003:3003"
+    environment:
+      <<: *kafka-env
+      PORT: 3003
+      KAFKA_CLIENT_ID: notification-service
+      KAFKA_GROUP_ID: notification-service
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  demo-client:
+    build: ./client
+    ports:
+      - "3010:3010"
+    environment:
+      PORT: 3010
+      CHAT_API_URL: http://localhost:3000/api
+      MESSAGE_WS_URL: http://localhost:3001
+      NOTIFICATION_API_URL: http://localhost:3003
+    depends_on:
+      - chat-api
+      - message-storage
+      - notification-service
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  redis_data:
