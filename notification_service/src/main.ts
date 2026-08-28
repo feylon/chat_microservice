@@ -2,6 +2,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Partitioners } from 'kafkajs';
 import { AppModule } from './app.module';
 import { parseBrokers } from './config/env.validation';
 
@@ -22,6 +23,7 @@ async function bootstrap() {
           brokers: parseBrokers(config.get<string>('KAFKA_BROKERS')),
         },
         consumer: { groupId: config.get<string>('KAFKA_GROUP_ID')! },
+        producer: { createPartitioner: Partitioners.LegacyPartitioner },
       },
     },
     { inheritAppConfig: true },
