@@ -11,7 +11,10 @@ describe('PresenceService', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     const moduleRef = await Test.createTestingModule({
-      providers: [PresenceService, { provide: PRESENCE_CLIENT, useValue: client }],
+      providers: [
+        PresenceService,
+        { provide: PRESENCE_CLIENT, useValue: client },
+      ],
     }).compile();
     service = moduleRef.get(PresenceService);
   });
@@ -22,12 +25,18 @@ describe('PresenceService', () => {
   });
 
   it('holatni qaytaradi', async () => {
-    client.send.mockReturnValue(of({ userId: 'u1', status: 'online', lastSeen: null }));
-    await expect(service.status('u1')).resolves.toMatchObject({ status: 'online' });
+    client.send.mockReturnValue(
+      of({ userId: 'u1', status: 'online', lastSeen: null }),
+    );
+    await expect(service.status('u1')).resolves.toMatchObject({
+      status: 'online',
+    });
   });
 
   it('presence ishlamasa 503 qaytaradi', async () => {
     client.send.mockReturnValue(throwError(() => new Error('down')));
-    await expect(service.status('u1')).rejects.toBeInstanceOf(ServiceUnavailableException);
+    await expect(service.status('u1')).rejects.toBeInstanceOf(
+      ServiceUnavailableException,
+    );
   });
 });

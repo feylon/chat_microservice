@@ -8,7 +8,10 @@ import { PresenceModule } from './presence/presence.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, validationSchema: envValidationSchema }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: envValidationSchema,
+    }),
     ClientsConfigModule,
     MessagesModule,
     PresenceModule,

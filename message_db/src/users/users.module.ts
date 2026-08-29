@@ -7,6 +7,6 @@ import { UserCacheEntity } from './entity/users_cache';
 @Module({
   imports: [TypeOrmModule.forFeature([UserCacheEntity])],
   controllers: [UsersController],
-  providers: [UsersService]
+  providers: [UsersService],
 })
 export class UsersModule {}

@@ -29,13 +29,20 @@ export class ConversationsService {
     };
   }
 
-  async isParticipant(conversationId: string, userId: string): Promise<boolean> {
-    const conversation = await this.conversations.findOne({ where: { id: conversationId } });
+  async isParticipant(
+    conversationId: string,
+    userId: string,
+  ): Promise<boolean> {
+    const conversation = await this.conversations.findOne({
+      where: { id: conversationId },
+    });
     return !!conversation && conversation.participants.includes(userId);
   }
 
   async canJoin(conversationId: string, userId: string): Promise<boolean> {
-    const conversation = await this.conversations.findOne({ where: { id: conversationId } });
+    const conversation = await this.conversations.findOne({
+      where: { id: conversationId },
+    });
     return !conversation || conversation.participants.includes(userId);
   }
 }

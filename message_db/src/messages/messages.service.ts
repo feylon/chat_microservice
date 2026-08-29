@@ -15,7 +15,8 @@ export const EDIT_WINDOW_MS = 24 * 60 * 60 * 1000;
 @Injectable()
 export class MessagesService {
   constructor(
-    @InjectRepository(MessageEntity) private readonly messages: Repository<MessageEntity>,
+    @InjectRepository(MessageEntity)
+    private readonly messages: Repository<MessageEntity>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -50,11 +51,16 @@ export class MessagesService {
       const savedMessage = await manager.save(message);
 
       if (body.messageType === 'file' && body.file) {
-        const file = manager.create(FileEntity, { ...body.file, messageId: savedMessage.id });
+        const file = manager.create(FileEntity, {
+          ...body.file,
+          messageId: savedMessage.id,
+        });
         savedMessage.file = await manager.save(file);
       }
 
-      const receiverIds = conversation.participants.filter((id) => id !== body.senderId);
+      const receiverIds = conversation.participants.filter(
+        (id) => id !== body.senderId,
+      );
 
       return { savedMessage, receiverIds };
     });
@@ -66,15 +72,24 @@ export class MessagesService {
     });
 
     if (!message) {
-      throw new DomainError('MESSAGE_NOT_FOUND', `${body.messageId} xabari topilmadi`);
+      throw new DomainError(
+        'MESSAGE_NOT_FOUND',
+        `${body.messageId} xabari topilmadi`,
+      );
     }
 
     if (message.senderId !== body.senderId) {
-      throw new DomainError('FORBIDDEN', 'Faqat xabar muallifi uni tahrirlashi mumkin');
+      throw new DomainError(
+        'FORBIDDEN',
+        'Faqat xabar muallifi uni tahrirlashi mumkin',
+      );
     }
 
     if (message.messageType !== 'text') {
-      throw new DomainError('NOT_EDITABLE', 'Faqat matnli xabarlarni tahrirlash mumkin');
+      throw new DomainError(
+        'NOT_EDITABLE',
+        'Faqat matnli xabarlarni tahrirlash mumkin',
+      );
     }
 
     if (Date.now() - new Date(message.createdAt).getTime() > EDIT_WINDOW_MS) {
@@ -94,11 +109,17 @@ export class MessagesService {
     });
 
     if (!message) {
-      throw new DomainError('MESSAGE_NOT_FOUND', `${body.messageId} xabari topilmadi`);
+      throw new DomainError(
+        'MESSAGE_NOT_FOUND',
+        `${body.messageId} xabari topilmadi`,
+      );
     }
 
     if (message.senderId !== body.senderId) {
-      throw new DomainError('FORBIDDEN', "Faqat xabar muallifi uni o'chirishi mumkin");
+      throw new DomainError(
+        'FORBIDDEN',
+        "Faqat xabar muallifi uni o'chirishi mumkin",
+      );
     }
 
     message.isDelete = true;

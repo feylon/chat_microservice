@@ -33,7 +33,10 @@ async function bootstrap() {
 
   const port = config.get<number>('PORT') ?? 3003;
   await app.listen(port);
-  Logger.log(`Notification service ishga tushdi: http://localhost:${port}`, 'Bootstrap');
+  Logger.log(
+    `Notification service ishga tushdi: http://localhost:${port}`,
+    'Bootstrap',
+  );
 }
 
 void bootstrap();

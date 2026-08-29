@@ -21,9 +21,14 @@ export class MessagesEventsController {
   @EventPattern('save_message_request')
   async onSaveMessage(@Payload() body: CreateMessageDTO) {
     await this.handle(body.senderId, async () => {
-      const { savedMessage, receiverIds } = await this.messagesService.saveMessage(body);
+      const { savedMessage, receiverIds } =
+        await this.messagesService.saveMessage(body);
 
-      this.gateway.sendToRoom(body.conversationId, 'receive_message', savedMessage);
+      this.gateway.sendToRoom(
+        body.conversationId,
+        'receive_message',
+        savedMessage,
+      );
       for (const receiverId of receiverIds) {
         this.gateway.sendToUser(receiverId, 'new_message', savedMessage);
       }
@@ -51,8 +56,12 @@ export class MessagesEventsController {
   @EventPattern('delete_message')
   async onDeleteMessage(@Payload() body: DeleteMessageDTO) {
     await this.handle(body.senderId, async () => {
-      const { messageId, conversationId } = await this.messagesService.deleteMessage(body);
-      this.gateway.sendToRoom(conversationId, 'delete_message', { messageId, isDeleted: true });
+      const { messageId, conversationId } =
+        await this.messagesService.deleteMessage(body);
+      this.gateway.sendToRoom(conversationId, 'delete_message', {
+        messageId,
+        isDeleted: true,
+      });
     });
   }
 
@@ -61,10 +70,16 @@ export class MessagesEventsController {
       await action();
     } catch (error) {
       if (error instanceof DomainError) {
-        this.gateway.sendError(senderId, { code: error.code, message: error.message });
+        this.gateway.sendError(senderId, {
+          code: error.code,
+          message: error.message,
+        });
         return;
       }
-      this.logger.error('Kafka hodisasini qayta ishlashda xatolik', error instanceof Error ? error.stack : error);
+      this.logger.error(
+        'Kafka hodisasini qayta ishlashda xatolik',
+        error instanceof Error ? error.stack : error,
+      );
       this.gateway.sendError(senderId, {
         code: 'INTERNAL_ERROR',
         message: 'Texnik xatolik yuz berdi',

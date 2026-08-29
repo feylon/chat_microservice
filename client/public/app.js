@@ -18,7 +18,10 @@ const uuid = () =>
         return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
       });
 
-const isUuid = (value) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+const isUuid = (value) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
 
 function toast(text) {
   const el = $('toast');
@@ -35,14 +38,17 @@ async function api(base, path, options = {}) {
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const message = Array.isArray(body.message) ? body.message.join(', ') : body.message;
+    const message = Array.isArray(body.message)
+      ? body.message.join(', ')
+      : body.message;
     throw new Error(message || `HTTP ${response.status}`);
   }
   return body;
 }
 
 const chatApi = (path, options) => api(state.config.chatApiUrl, path, options);
-const notificationApi = (path, options) => api(state.config.notificationApiUrl, path, options);
+const notificationApi = (path, options) =>
+  api(state.config.notificationApiUrl, path, options);
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -61,7 +67,12 @@ function setConnection(online) {
 }
 
 function formatTime(value) {
-  return value ? new Date(value).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }) : '';
+  return value
+    ? new Date(value).toLocaleTimeString('uz-UZ', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : '';
 }
 
 function renderMessage(message) {
@@ -76,13 +87,17 @@ function renderMessage(message) {
 
   const text = document.createElement('div');
   text.className = 'text';
-  text.textContent = message.messageType === 'file' ? `📎 ${message.file?.fileName ?? 'fayl'}` : message.content;
+  text.textContent =
+    message.messageType === 'file'
+      ? `📎 ${message.file?.fileName ?? 'fayl'}`
+      : message.content;
   li.appendChild(text);
 
   const meta = document.createElement('div');
   meta.className = 'meta';
   const time = document.createElement('span');
-  time.textContent = formatTime(message.createdAt) + (message.edited ? ' · tahrirlandi' : '');
+  time.textContent =
+    formatTime(message.createdAt) + (message.edited ? ' · tahrirlandi' : '');
   meta.appendChild(time);
 
   if (message.senderId === state.userId) {
@@ -107,7 +122,8 @@ function scrollToBottom() {
 
 async function editMessage(message) {
   const content = prompt('Yangi matn:', message.content);
-  if (content === null || content.trim() === '' || content === message.content) return;
+  if (content === null || content.trim() === '' || content === message.content)
+    return;
   try {
     await chatApi(`/messages/${message.id}`, {
       method: 'PATCH',
@@ -138,7 +154,9 @@ function renderConversations(list) {
     return;
   }
   for (const conversation of list) {
-    const peer = conversation.participants.find((id) => id !== state.userId) ?? state.userId;
+    const peer =
+      conversation.participants.find((id) => id !== state.userId) ??
+      state.userId;
     const li = document.createElement('li');
     li.textContent = peer;
     li.title = `Suhbat: ${conversation.id}`;
@@ -149,12 +167,18 @@ function renderConversations(list) {
 }
 
 function refreshConversations() {
-  state.socket.emit('get_conversations', { userId: state.userId, page: 1, limit: 50 });
+  state.socket.emit('get_conversations', {
+    userId: state.userId,
+    page: 1,
+    limit: 50,
+  });
 }
 
 async function refreshNotifications() {
   try {
-    const { data } = await notificationApi(`/notifications/${state.userId}?unread=true`);
+    const { data } = await notificationApi(
+      `/notifications/${state.userId}?unread=true`,
+    );
     const ul = $('notifications');
     ul.innerHTML = '';
     if (data.length === 0) {
@@ -166,7 +190,9 @@ async function refreshNotifications() {
       li.textContent = `${item.senderId.slice(0, 8)}…: ${item.preview}`;
       ul.appendChild(li);
     }
-    await notificationApi(`/notifications/${state.userId}/read`, { method: 'PATCH' });
+    await notificationApi(`/notifications/${state.userId}/read`, {
+      method: 'PATCH',
+    });
   } catch (error) {
     toast(`Bildirishnomalar: ${error.message}`);
   }
@@ -197,7 +223,11 @@ function openConversation(conversationId, receiverId) {
   $('messages').innerHTML = '';
   $('messageInput').disabled = false;
   document.querySelector('#sendForm button').disabled = false;
-  document.querySelectorAll('#conversations li').forEach((li) => li.classList.toggle('active', li.title.endsWith(conversationId)));
+  document
+    .querySelectorAll('#conversations li')
+    .forEach((li) =>
+      li.classList.toggle('active', li.title.endsWith(conversationId)),
+    );
 
   state.socket.emit('join_room', { conversationId });
   state.socket.emit('get_messages', { conversationId, page: 1, limit: 50 });
@@ -243,7 +273,12 @@ function bindSocket(socket) {
   socket.on('message_update', ({ messageId, newContent, updatedAt }) => {
     const li = document.querySelector(`#messages li[data-id="${messageId}"]`);
     if (li && li._message) {
-      renderMessage({ ...li._message, content: newContent, updatedAt, edited: true });
+      renderMessage({
+        ...li._message,
+        content: newContent,
+        updatedAt,
+        edited: true,
+      });
     }
   });
 
@@ -253,7 +288,10 @@ function bindSocket(socket) {
 
   socket.on('error_notification', (error) => toast(error.message));
   socket.on('exception', (error) => {
-    const message = typeof error.message === 'string' ? error.message : JSON.stringify(error.message);
+    const message =
+      typeof error.message === 'string'
+        ? error.message
+        : JSON.stringify(error.message);
     toast(message);
   });
 }
@@ -276,14 +314,24 @@ async function connect() {
     return;
   }
 
-  state.socket = io(state.config.messageWsUrl, { auth: { userId }, transports: ['websocket', 'polling'] });
+  state.socket = io(state.config.messageWsUrl, {
+    auth: { userId },
+    transports: ['websocket', 'polling'],
+  });
   bindSocket(state.socket);
 
   $('login').hidden = true;
   $('app').hidden = false;
 
-  const ping = () => chatApi('/presence/heartbeat', { method: 'POST', body: JSON.stringify({ userId }) }).catch(() => {});
-  chatApi('/presence/online', { method: 'POST', body: JSON.stringify({ userId }) }).catch((error) => toast(error.message));
+  const ping = () =>
+    chatApi('/presence/heartbeat', {
+      method: 'POST',
+      body: JSON.stringify({ userId }),
+    }).catch(() => {});
+  chatApi('/presence/online', {
+    method: 'POST',
+    body: JSON.stringify({ userId }),
+  }).catch((error) => toast(error.message));
   state.heartbeat = setInterval(ping, 60000);
 
   refreshNotifications();

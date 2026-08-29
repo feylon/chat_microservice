@@ -10,8 +10,16 @@ export class HealthController {
     try {
       await this.dataSource.query('SELECT 1');
     } catch {
-      throw new ServiceUnavailableException({ status: 'error', database: 'down' });
+      throw new ServiceUnavailableException({
+        status: 'error',
+        database: 'down',
+      });
     }
-    return { status: 'ok', service: 'message-storage', database: 'up', time: new Date().toISOString() };
+    return {
+      status: 'ok',
+      service: 'message-storage',
+      database: 'up',
+      time: new Date().toISOString(),
+    };
   }
 }

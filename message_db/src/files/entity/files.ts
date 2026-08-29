@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { MessageEntity } from '../../messages/entity/messages';
 
 @Entity('files')
@@ -21,7 +28,9 @@ export class FileEntity {
   @Column({ type: 'uuid', nullable: true })
   messageId!: string | null;
 
-  @OneToOne(() => MessageEntity, (message) => message.file, { onDelete: 'CASCADE' })
+  @OneToOne(() => MessageEntity, (message) => message.file, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'messageId' })
   message!: MessageEntity;
 

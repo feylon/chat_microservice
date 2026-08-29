@@ -1,4 +1,10 @@
-import { ArrayMaxSize, ArrayNotEmpty, IsArray, IsNotEmpty, IsString } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayNotEmpty,
+  IsArray,
+  IsNotEmpty,
+  IsString,
+} from 'class-validator';
 
 export class GetUserStatusDto {
   @IsString()

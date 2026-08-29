@@ -1,6 +1,16 @@
 import { ConversationEntity } from '../../conversations/entity/conversations';
 import { FileEntity } from '../../files/entity/files';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, Index, ManyToOne, OneToOne, JoinColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  Index,
+  ManyToOne,
+  OneToOne,
+  JoinColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('messages')
 export class MessageEntity {

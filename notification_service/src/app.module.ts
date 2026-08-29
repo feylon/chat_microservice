@@ -6,7 +6,10 @@ import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, validationSchema: envValidationSchema }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: envValidationSchema,
+    }),
     NotificationsModule,
   ],
   controllers: [HealthController],

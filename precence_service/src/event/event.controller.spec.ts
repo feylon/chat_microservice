@@ -7,7 +7,9 @@ describe('EventController', () => {
   const service = {
     setOnline: jest.fn(),
     setOffline: jest.fn(),
-    getStatus: jest.fn().mockResolvedValue({ userId: 'u1', status: 'online', lastSeen: null }),
+    getStatus: jest
+      .fn()
+      .mockResolvedValue({ userId: 'u1', status: 'online', lastSeen: null }),
     getStatuses: jest.fn().mockResolvedValue([]),
   };
 
@@ -31,6 +33,8 @@ describe('EventController', () => {
   });
 
   it('holat so`rovini qaytaradi', async () => {
-    await expect(controller.getUserStatus({ userId: 'u1' })).resolves.toMatchObject({ status: 'online' });
+    await expect(
+      controller.getUserStatus({ userId: 'u1' }),
+    ).resolves.toMatchObject({ status: 'online' });
   });
 });

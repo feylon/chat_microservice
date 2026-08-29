@@ -22,7 +22,10 @@ export class WebSocketValidationPipe implements PipeTransform<unknown> {
     }
 
     const instance: object = plainToInstance(metatype, data ?? {});
-    const errors = await validate(instance, { whitelist: true, forbidNonWhitelisted: true });
+    const errors = await validate(instance, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    });
 
     if (errors.length > 0) {
       throw new WsException({

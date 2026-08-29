@@ -20,7 +20,10 @@ async function bootstrap() {
 
   const port = config.get<number>('PORT') ?? 3000;
   await app.listen(port);
-  Logger.log(`Chat API ishga tushdi: http://localhost:${port}/api`, 'Bootstrap');
+  Logger.log(
+    `Chat API ishga tushdi: http://localhost:${port}/api`,
+    'Bootstrap',
+  );
 }
 
 void bootstrap();

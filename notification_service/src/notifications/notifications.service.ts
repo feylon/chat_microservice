@@ -23,18 +23,26 @@ export class NotificationsService {
     private readonly store: NotificationsStore,
   ) {}
 
-  async handleMessageSaved(event: MessageSavedEventDto): Promise<Notification[]> {
-    const receivers = [...new Set(event.receivers)].filter((id) => id !== event.message.senderId);
+  async handleMessageSaved(
+    event: MessageSavedEventDto,
+  ): Promise<Notification[]> {
+    const receivers = [...new Set(event.receivers)].filter(
+      (id) => id !== event.message.senderId,
+    );
     if (receivers.length === 0) {
       return [];
     }
 
     const offline = await this.findOfflineUsers(receivers);
-    const created = offline.map((userId) => this.buildNotification(userId, event));
+    const created = offline.map((userId) =>
+      this.buildNotification(userId, event),
+    );
 
     for (const notification of created) {
       this.store.add(notification);
-      this.logger.log(`Offline foydalanuvchi ${notification.userId} uchun bildirishnoma yaratildi`);
+      this.logger.log(
+        `Offline foydalanuvchi ${notification.userId} uchun bildirishnoma yaratildi`,
+      );
     }
 
     return created;
@@ -43,25 +51,40 @@ export class NotificationsService {
   private async findOfflineUsers(userIds: string[]): Promise<string[]> {
     try {
       const statuses = await lastValueFrom(
-        this.presence.send<UserPresence[]>('get_users_status', { userIds }).pipe(timeout(3000)),
+        this.presence
+          .send<UserPresence[]>('get_users_status', { userIds })
+          .pipe(timeout(3000)),
       );
-      return statuses.filter((item) => item.status !== 'online').map((item) => item.userId);
+      return statuses
+        .filter((item) => item.status !== 'online')
+        .map((item) => item.userId);
     } catch (error) {
-      this.logger.warn(`Presence xizmatidan javob olinmadi, barcha qabul qiluvchilar offline deb hisoblandi: ${String(error)}`);
+      this.logger.warn(
+        `Presence xizmatidan javob olinmadi, barcha qabul qiluvchilar offline deb hisoblandi: ${String(error)}`,
+      );
       return userIds;
     }
   }
 
-  private buildNotification(userId: string, event: MessageSavedEventDto): Notification {
+  private buildNotification(
+    userId: string,
+    event: MessageSavedEventDto,
+  ): Notification {
     const { message } = event;
-    const text = message.messageType === 'file' ? 'Fayl yuborildi' : (message.content ?? '');
+    const text =
+      message.messageType === 'file'
+        ? 'Fayl yuborildi'
+        : (message.content ?? '');
     return {
       id: randomUUID(),
       userId,
       conversationId: message.conversationId,
       messageId: message.id,
       senderId: message.senderId,
-      preview: text.length > PREVIEW_LENGTH ? `${text.slice(0, PREVIEW_LENGTH)}...` : text,
+      preview:
+        text.length > PREVIEW_LENGTH
+          ? `${text.slice(0, PREVIEW_LENGTH)}...`
+          : text,
       createdAt: new Date().toISOString(),
       read: false,
     };

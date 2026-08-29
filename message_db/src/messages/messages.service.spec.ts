@@ -19,10 +19,14 @@ describe('MessagesService', () => {
   const manager = {
     findOne: jest.fn(),
     create: jest.fn((_entity: unknown, data: object) => ({ ...data })),
-    save: jest.fn((entity: object) => Promise.resolve({ id: 'generated', ...entity })),
+    save: jest.fn((entity: object) =>
+      Promise.resolve({ id: 'generated', ...entity }),
+    ),
   };
   const dataSource = {
-    transaction: jest.fn((work: (m: typeof manager) => unknown) => work(manager)),
+    transaction: jest.fn((work: (m: typeof manager) => unknown) =>
+      work(manager),
+    ),
   };
 
   beforeEach(async () => {
@@ -50,13 +54,19 @@ describe('MessagesService', () => {
       });
 
       expect(manager.save).toHaveBeenCalledWith(
-        expect.objectContaining({ id: CONVERSATION, participants: [SENDER, RECEIVER] }),
+        expect.objectContaining({
+          id: CONVERSATION,
+          participants: [SENDER, RECEIVER],
+        }),
       );
       expect(receiverIds).toEqual([RECEIVER]);
     });
 
     it("mavjud suhbatga yangi ishtirokchini qo'shadi", async () => {
-      manager.findOne.mockResolvedValue({ id: CONVERSATION, participants: [SENDER] });
+      manager.findOne.mockResolvedValue({
+        id: CONVERSATION,
+        participants: [SENDER],
+      });
 
       const { receiverIds } = await service.saveMessage({
         conversationId: CONVERSATION,
@@ -71,49 +81,96 @@ describe('MessagesService', () => {
   });
 
   describe('editMessage', () => {
-    const base = { id: 'm1', senderId: SENDER, conversationId: CONVERSATION, messageType: 'text' };
+    const base = {
+      id: 'm1',
+      senderId: SENDER,
+      conversationId: CONVERSATION,
+      messageType: 'text',
+    };
 
     it('muallif bo`lmasa rad etadi', async () => {
-      repository.findOne.mockResolvedValue({ ...base, senderId: RECEIVER, createdAt: new Date() });
+      repository.findOne.mockResolvedValue({
+        ...base,
+        senderId: RECEIVER,
+        createdAt: new Date(),
+      });
       await expect(
-        service.editMessage({ messageId: 'm1', senderId: SENDER, content: 'x' }),
+        service.editMessage({
+          messageId: 'm1',
+          senderId: SENDER,
+          content: 'x',
+        }),
       ).rejects.toMatchObject({ code: 'FORBIDDEN' });
     });
 
     it('1 sutkadan keyin tahrirlashga ruxsat bermaydi', async () => {
-      repository.findOne.mockResolvedValue({ ...base, createdAt: new Date(Date.now() - EDIT_WINDOW_MS - 1000) });
+      repository.findOne.mockResolvedValue({
+        ...base,
+        createdAt: new Date(Date.now() - EDIT_WINDOW_MS - 1000),
+      });
       await expect(
-        service.editMessage({ messageId: 'm1', senderId: SENDER, content: 'x' }),
+        service.editMessage({
+          messageId: 'm1',
+          senderId: SENDER,
+          content: 'x',
+        }),
       ).rejects.toMatchObject({ code: 'EDIT_WINDOW_EXPIRED' });
     });
 
     it('xabar topilmasa DomainError qaytaradi', async () => {
       repository.findOne.mockResolvedValue(null);
       await expect(
-        service.editMessage({ messageId: 'm1', senderId: SENDER, content: 'x' }),
+        service.editMessage({
+          messageId: 'm1',
+          senderId: SENDER,
+          content: 'x',
+        }),
       ).rejects.toBeInstanceOf(DomainError);
     });
 
     it('matnni yangilaydi', async () => {
-      repository.findOne.mockResolvedValue({ ...base, content: 'eski', createdAt: new Date() });
-      const result = await service.editMessage({ messageId: 'm1', senderId: SENDER, content: 'yangi' });
+      repository.findOne.mockResolvedValue({
+        ...base,
+        content: 'eski',
+        createdAt: new Date(),
+      });
+      const result = await service.editMessage({
+        messageId: 'm1',
+        senderId: SENDER,
+        content: 'yangi',
+      });
       expect(result.content).toBe('yangi');
     });
   });
 
   describe('deleteMessage', () => {
     it("xabarni o'chirilgan deb belgilaydi", async () => {
-      repository.findOne.mockResolvedValue({ id: 'm1', senderId: SENDER, conversationId: CONVERSATION, isDelete: false });
-      await expect(service.deleteMessage({ messageId: 'm1', senderId: SENDER })).resolves.toEqual({
+      repository.findOne.mockResolvedValue({
+        id: 'm1',
+        senderId: SENDER,
+        conversationId: CONVERSATION,
+        isDelete: false,
+      });
+      await expect(
+        service.deleteMessage({ messageId: 'm1', senderId: SENDER }),
+      ).resolves.toEqual({
         messageId: 'm1',
         conversationId: CONVERSATION,
       });
-      expect(repository.save).toHaveBeenCalledWith(expect.objectContaining({ isDelete: true }));
+      expect(repository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ isDelete: true }),
+      );
     });
 
     it("boshqa foydalanuvchi o'chira olmaydi", async () => {
-      repository.findOne.mockResolvedValue({ id: 'm1', senderId: RECEIVER, conversationId: CONVERSATION });
-      await expect(service.deleteMessage({ messageId: 'm1', senderId: SENDER })).rejects.toMatchObject({
+      repository.findOne.mockResolvedValue({
+        id: 'm1',
+        senderId: RECEIVER,
+        conversationId: CONVERSATION,
+      });
+      await expect(
+        service.deleteMessage({ messageId: 'm1', senderId: SENDER }),
+      ).rejects.toMatchObject({
         code: 'FORBIDDEN',
       });
     });
@@ -121,7 +178,11 @@ describe('MessagesService', () => {
 
   it('xabarlarni sahifalab, eskidan yangiga qaytaradi', async () => {
     repository.findAndCount.mockResolvedValue([[{ id: '2' }, { id: '1' }], 3]);
-    const result = await service.getMessages({ conversationId: CONVERSATION, page: 1, limit: 2 });
+    const result = await service.getMessages({
+      conversationId: CONVERSATION,
+      page: 1,
+      limit: 2,
+    });
     expect(result.data.map((m) => m.id)).toEqual(['1', '2']);
     expect(result.lastPage).toBe(2);
   });

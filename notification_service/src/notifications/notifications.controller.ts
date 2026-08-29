@@ -1,4 +1,11 @@
-import { Controller, Get, Param, ParseBoolPipe, Patch, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseBoolPipe,
+  Patch,
+  Query,
+} from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { MessageSavedEventDto } from './dto/messageSaved.dto';
 import { NotificationsService } from './notifications.service';

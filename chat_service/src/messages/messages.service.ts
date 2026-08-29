@@ -19,7 +19,9 @@ export class MessagesService {
 
   async send(dto: SendMessageDto) {
     const conversationId = dto.conversationId ?? randomUUID();
-    await lastValueFrom(this.kafka.emit(TOPICS.save, { ...dto, conversationId }));
+    await lastValueFrom(
+      this.kafka.emit(TOPICS.save, { ...dto, conversationId }),
+    );
     return { status: 'queued', conversationId };
   }
 

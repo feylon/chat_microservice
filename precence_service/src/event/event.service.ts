@@ -37,13 +37,24 @@ export class EventService {
 
   async setOffline(userId: string): Promise<UserPresence> {
     const now = new Date().toISOString();
-    await this.redis.multi().del(ONLINE_KEY(userId)).set(LAST_SEEN_KEY(userId), now).exec();
+    await this.redis
+      .multi()
+      .del(ONLINE_KEY(userId))
+      .set(LAST_SEEN_KEY(userId), now)
+      .exec();
     return { userId, status: 'offline', lastSeen: now };
   }
 
   async getStatus(userId: string): Promise<UserPresence> {
-    const [online, lastSeen] = await this.redis.mget(ONLINE_KEY(userId), LAST_SEEN_KEY(userId));
-    return { userId, status: online ? 'online' : 'offline', lastSeen: lastSeen ?? null };
+    const [online, lastSeen] = await this.redis.mget(
+      ONLINE_KEY(userId),
+      LAST_SEEN_KEY(userId),
+    );
+    return {
+      userId,
+      status: online ? 'online' : 'offline',
+      lastSeen: lastSeen ?? null,
+    };
   }
 
   async getStatuses(userIds: string[]): Promise<UserPresence[]> {

@@ -26,7 +26,8 @@ const createRedisMock = () => {
   return {
     store,
     multi,
-    mget: (...keys: string[]) => Promise.resolve(keys.map((key) => store.get(key) ?? null)),
+    mget: (...keys: string[]) =>
+      Promise.resolve(keys.map((key) => store.get(key) ?? null)),
   };
 };
 
@@ -50,7 +51,9 @@ describe('EventService', () => {
   it('foydalanuvchini online qiladi', async () => {
     await service.setOnline('u1');
     expect(redis.store.has(ONLINE_KEY('u1'))).toBe(true);
-    await expect(service.getStatus('u1')).resolves.toMatchObject({ status: 'online' });
+    await expect(service.getStatus('u1')).resolves.toMatchObject({
+      status: 'online',
+    });
   });
 
   it('foydalanuvchini offline qiladi va oxirgi faollikni saqlaydi', async () => {

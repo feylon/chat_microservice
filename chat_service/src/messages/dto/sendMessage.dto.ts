@@ -1,5 +1,15 @@
 import { Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, ValidateIf, ValidateNested } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+  Min,
+  ValidateIf,
+  ValidateNested,
+} from 'class-validator';
 
 export class FileDto {
   @IsString()
@@ -27,7 +37,10 @@ export class SendMessageDto {
   @IsUUID()
   receiverId!: string;
 
-  @ValidateIf((dto: SendMessageDto) => dto.messageType !== 'file' || dto.content !== undefined)
+  @ValidateIf(
+    (dto: SendMessageDto) =>
+      dto.messageType !== 'file' || dto.content !== undefined,
+  )
   @IsString()
   @MaxLength(4000)
   content?: string;

@@ -5,7 +5,13 @@ import { NotificationsService, PRESENCE_CLIENT } from './notifications.service';
 import { NotificationsStore } from './notifications.store';
 
 const event = {
-  message: { id: 'm1', conversationId: 'c1', senderId: 'a', content: 'Salom!', messageType: 'text' },
+  message: {
+    id: 'm1',
+    conversationId: 'c1',
+    senderId: 'a',
+    content: 'Salom!',
+    messageType: 'text',
+  },
   receivers: ['b', 'c'],
 };
 
@@ -48,13 +54,21 @@ describe('NotificationsService', () => {
   });
 
   it("yuboruvchining o'ziga bildirishnoma yubormaydi", async () => {
-    const created = await service.handleMessageSaved({ ...event, receivers: ['a'] });
+    const created = await service.handleMessageSaved({
+      ...event,
+      receivers: ['a'],
+    });
     expect(created).toEqual([]);
     expect(presence.send).not.toHaveBeenCalled();
   });
 
   it("o'qilgan deb belgilaydi", async () => {
-    presence.send.mockReturnValue(of([{ userId: 'b', status: 'offline' }, { userId: 'c', status: 'offline' }]));
+    presence.send.mockReturnValue(
+      of([
+        { userId: 'b', status: 'offline' },
+        { userId: 'c', status: 'offline' },
+      ]),
+    );
     await service.handleMessageSaved(event);
     expect(store.markAllRead('b')).toBe(1);
     expect(store.list('b', true)).toHaveLength(0);

@@ -25,17 +25,27 @@ describe('MessagesService', () => {
     expect(result.conversationId).toMatch(/^[0-9a-f-]{36}$/);
     expect(kafka.emit).toHaveBeenCalledWith(
       TOPICS.save,
-      expect.objectContaining({ conversationId: result.conversationId, content: 'salom' }),
+      expect.objectContaining({
+        conversationId: result.conversationId,
+        content: 'salom',
+      }),
     );
   });
 
   it('tahrirlash hodisasini yuboradi', async () => {
     await service.edit('m1', { senderId: 's1', content: 'yangi' });
-    expect(kafka.emit).toHaveBeenCalledWith(TOPICS.edit, { messageId: 'm1', senderId: 's1', content: 'yangi' });
+    expect(kafka.emit).toHaveBeenCalledWith(TOPICS.edit, {
+      messageId: 'm1',
+      senderId: 's1',
+      content: 'yangi',
+    });
   });
 
   it("o'chirish hodisasini yuboradi", async () => {
     await service.remove('m1', { senderId: 's1' });
-    expect(kafka.emit).toHaveBeenCalledWith(TOPICS.delete, { messageId: 'm1', senderId: 's1' });
+    expect(kafka.emit).toHaveBeenCalledWith(TOPICS.delete, {
+      messageId: 'm1',
+      senderId: 's1',
+    });
   });
 });

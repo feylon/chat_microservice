@@ -38,7 +38,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.data.userId = userId;
       void client.join(userRoom(userId));
     }
-    this.logger.log(`Ulandi: ${client.id}${userId ? ` (user: ${userId})` : ''}`);
+    this.logger.log(
+      `Ulandi: ${client.id}${userId ? ` (user: ${userId})` : ''}`,
+    );
   }
 
   handleDisconnect(client: Socket) {
@@ -58,24 +60,40 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('join_room')
-  async handleJoinRoom(@MessageBody() body: JoinRoomDto, @ConnectedSocket() client: Socket) {
+  async handleJoinRoom(
+    @MessageBody() body: JoinRoomDto,
+    @ConnectedSocket() client: Socket,
+  ) {
     const userId = client.data.userId as string | undefined;
-    if (userId && !(await this.conversationsService.canJoin(body.conversationId, userId))) {
+    if (
+      userId &&
+      !(await this.conversationsService.canJoin(body.conversationId, userId))
+    ) {
       throw new WsException('Siz bu suhbat ishtirokchisi emassiz');
     }
     await client.join(body.conversationId);
-    return { event: 'joined_room', data: { conversationId: body.conversationId } };
+    return {
+      event: 'joined_room',
+      data: { conversationId: body.conversationId },
+    };
   }
 
   @SubscribeMessage('leave_room')
-  async handleLeaveRoom(@MessageBody() body: JoinRoomDto, @ConnectedSocket() client: Socket) {
+  async handleLeaveRoom(
+    @MessageBody() body: JoinRoomDto,
+    @ConnectedSocket() client: Socket,
+  ) {
     await client.leave(body.conversationId);
-    return { event: 'left_room', data: { conversationId: body.conversationId } };
+    return {
+      event: 'left_room',
+      data: { conversationId: body.conversationId },
+    };
   }
 
   @SubscribeMessage('get_conversations')
   async handleGetConversations(@MessageBody() body: GetConversationsDto) {
-    const conversations = await this.conversationsService.getUserConversations(body);
+    const conversations =
+      await this.conversationsService.getUserConversations(body);
     return { event: 'conversations_list', data: conversations };
   }
 
@@ -86,7 +104,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   private extractUserId(client: Socket): string | undefined {
-    const fromAuth = (client.handshake.auth as Record<string, unknown> | undefined)?.userId;
+    const fromAuth = (
+      client.handshake.auth as Record<string, unknown> | undefined
+    )?.userId;
     const fromQuery = client.handshake.query?.userId;
     const value = fromAuth ?? fromQuery;
     return typeof value === 'string' && value.length > 0 ? value : undefined;
